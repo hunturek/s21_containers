@@ -3,11 +3,10 @@
 #define RED 1
 #define BLACK 0
 
-
-class bitree {
+template <typename T> class bitree {
 private:
   typedef struct node {
-    int value = 0;
+    T value;
     node *parrent;
     node *left;
     node *right;
@@ -22,16 +21,14 @@ private:
   int rc(node *); // recolor
 
 public:
-  bitree() {
-    root = nullptr;
-  }
+  bitree() { root = nullptr; }
   ~bitree() {}
-  int set(const int value);
-  int set(const int *value, size_t size);
+  int set(const T value);
+  int set(const T *values, size_t size);
   void show();
 };
 
-int bitree::set(const int value) {
+template <typename T> int bitree<T>::set(const T value) {
   node *current, *parrent, *new_node;
   current = root;
   parrent = nullptr;
@@ -62,14 +59,14 @@ int bitree::set(const int value) {
   return 0;
 }
 
-int bitree::set(const int *value, size_t size) {
+template <typename T> int bitree<T>::set(const T *values, size_t size) {
   int exit = 0;
   for (size_t i = 0; i < size && exit == 0; i++)
-    exit = set(value[i]);
+    exit = set(values[i]);
   return exit;
 }
 
-void bitree::show() {
+template <typename T> void bitree<T>::show() {
   node *iterator = root;
   char code = 0;
   while (code != 'q') {
@@ -85,56 +82,54 @@ void bitree::show() {
   }
 }
 
-int bitree::balance(node *nd) {
-  node *father = nd->parrent;
-  node *grandfather;
-  if(father)
-    grandfather = father->parrent;
-    while (nd != root && nd->parrent->color == RED) {
-        if (father == grandfather->left) {
-            node *uncle = grandfather->right;
-            if (uncle && uncle->color == RED) {
-                rc(grandfather);
-                nd = grandfather;
-            } else {
-                if (nd == father->right) {
-                    nd = father;
-                    lr(nd);
-                }
-                father->color = BLACK;
-                grandfather->color = RED;
-                rr(grandfather);
-            }
-        } else {
-            node *uncle = grandfather->left;
-            if (uncle && uncle->color == RED) {
-                rc(grandfather);
-                nd = grandfather;
-            } else {
-                if (nd == father->left) {
-                    nd = father;
-                    rr(nd);
-                }
-                nd->parrent->color = BLACK;
-                grandfather->color = RED;
-                lr(grandfather);
-            }
+template <typename T> int bitree<T>::balance(node *x) {
+  while (x != root && x->parrent->color == RED) {
+    if (x->parrent == x->parrent->parrent->left) {
+      node *y = x->parrent->parrent->right;
+      if (y && y->color == RED) {
+        rc(x->parrent->parrent);
+        x = x->parrent->parrent;
+      } else {
+        if (x == x->parrent->right) {
+          x = x->parrent;
+          lr(x);
         }
+        x->parrent->color = BLACK;
+        x->parrent->parrent->color = RED;
+        rr(x->parrent->parrent);
+      }
+    } else {
+      node *y = x->parrent->parrent->left;
+      if (y && y->color == RED) {
+        rc(x->parrent->parrent);
+        x = x->parrent->parrent;
+      } else {
+        if (x == x->parrent->left) {
+          x = x->parrent;
+          rr(x);
+        }
+        x->parrent->color = BLACK;
+        x->parrent->parrent->color = RED;
+        lr(x->parrent->parrent);
+      }
     }
-    root->color = BLACK;  
-    return 0;
+  }
+  root->color = BLACK;
+  return 0;
 }
 
-int bitree::rc(node *nd) {
+template <typename T> int bitree<T>::rc(node *nd) {
   nd->left->color = BLACK;
   nd->right->color = BLACK;
   nd->color = RED;
   return 0;
 }
 
-int bitree::lr(node *nd) {
+template <typename T> int bitree<T>::lr(node *nd) {
   node *pNode = nd;
   node *cNode = nd->right;
+  if (!cNode)
+    return 1;
   pNode->right = cNode->left;
   if (cNode->left != nullptr)
     cNode->left->parrent = pNode;
@@ -154,9 +149,11 @@ int bitree::lr(node *nd) {
   return 0;
 }
 
-int bitree::rr(node *nd) {
+template <typename T> int bitree<T>::rr(node *nd) {
   node *pNode = nd;
   node *cNode = nd->left;
+  if (!cNode)
+    return 1;
   pNode->left = cNode->right;
   if (cNode->right != nullptr)
     cNode->right->parrent = pNode;
