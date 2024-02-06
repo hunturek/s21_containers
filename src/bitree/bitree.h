@@ -3,10 +3,11 @@
 #define RED 1
 #define BLACK 0
 
-template <typename T> class bitree {
+template <typename T, typename T2> class bitree {
 private:
   typedef struct node {
-    T value;
+	T key;
+    T2 value;
     node *parent;
     node *left;
     node *right;
@@ -17,7 +18,7 @@ private:
 
   int add_balance(node *);
   int del_balance(node *);
-  node *find(const T);
+  node *find(const T2);
   int lr(node *); // left rotate
   int rr(node *); // right rotate
   int rc(node *); // recolor
@@ -25,14 +26,14 @@ private:
 public:
   bitree() { root = nullptr; }
   ~bitree() {}
-  int add(const T);
-  int add(const T *, size_t);
-  int del(const T);
-  int del(const T *, size_t);
+  int add(const T2);
+  int add(const T2 *, size_t);
+  int del(const T2);
+  int del(const T2 *, size_t);
   void show();
 };
 
-template <typename T> int bitree<T>::add(const T value) {
+template <typename T, typename T2> int bitree<T, T2>::add(const T2 value) {
   node *current, *parent, *new_node;
   current = root;
   parent = nullptr;
@@ -63,14 +64,14 @@ template <typename T> int bitree<T>::add(const T value) {
   return 0;
 }
 
-template <typename T> int bitree<T>::add(const T *values, size_t size) {
+template <typename T, typename T2> int bitree<T, T2>::add(const T2 *values, size_t size) {
   int exit = 0;
   for (size_t i = 0; i < size && exit == 0; i++)
     exit = add(values[i]);
   return exit;
 }
 
-template <typename T> typename bitree<T>::node* bitree<T>::find(const T value) {
+template <typename T, typename T2> typename bitree<T, T2>::node* bitree<T, T2>::find(const T2 value) {
   node *iterator = root;
   while (iterator != nullptr)
     if (value == iterator->value)
@@ -80,7 +81,7 @@ template <typename T> typename bitree<T>::node* bitree<T>::find(const T value) {
   return 0;
 }
 
-template <typename T> int bitree<T>::del(const T value) {
+template <typename T, typename T2> int bitree<T, T2>::del(const T2 value) {
 	node *x, *y, *z = find(value);
     if (!z || z == nullptr) return 1;
     if (z->left == nullptr || z->right == nullptr) {
@@ -108,14 +109,14 @@ template <typename T> int bitree<T>::del(const T value) {
 	return 0;
 }
 
-template <typename T> int bitree<T>::del(const T *values, size_t size) {
+template <typename T, typename T2> int bitree<T, T2>::del(const T2 *values, size_t size) {
   int exit = 0;
   for (size_t i = 0; i < size && exit == 0; i++)
     exit = del(values[i]);
   return exit;
 }
 
-template <typename T> void bitree<T>::show() {
+template <typename T, typename T2> void bitree<T, T2>::show() {
   node *iterator = root;
   char code = 0;
   while (code != 'q') {
@@ -131,7 +132,7 @@ template <typename T> void bitree<T>::show() {
   }
 }
 
-template <typename T> int bitree<T>::add_balance(node *nd) {
+template <typename T, typename T2> int bitree<T, T2>::add_balance(node *nd) {
   while (nd != root && nd->parent->color == RED) {
     if (nd->parent == nd->parent->parent->left) {
       node *uncle = nd->parent->parent->right;
@@ -167,7 +168,7 @@ template <typename T> int bitree<T>::add_balance(node *nd) {
   return 0;
 }
 
-template <typename T> int bitree<T>::del_balance(node *nd) {
+template <typename T, typename T2> int bitree<T, T2>::del_balance(node *nd) {
 	 while (nd != root && nd->color == BLACK) {
         if (nd == nd->parent->left) {
             node *brother = nd->parent->right;
@@ -223,14 +224,14 @@ template <typename T> int bitree<T>::del_balance(node *nd) {
 	return 0;
 }
 
-template <typename T> int bitree<T>::rc(node *nd) {
+template <typename T, typename T2> int bitree<T, T2>::rc(node *nd) {
   nd->left->color = BLACK;
   nd->right->color = BLACK;
   nd->color = RED;
   return 0;
 }
 
-template <typename T> int bitree<T>::lr(node *nd) {
+template <typename T, typename T2> int bitree<T, T2>::lr(node *nd) {
   node *pNode = nd;
   node *cNode = nd->right;
   if (!cNode)
@@ -254,7 +255,7 @@ template <typename T> int bitree<T>::lr(node *nd) {
   return 0;
 }
 
-template <typename T> int bitree<T>::rr(node *nd) {
+template <typename T, typename T2> int bitree<T, T2>::rr(node *nd) {
   node *pNode = nd;
   node *cNode = nd->left;
   if (!cNode)
