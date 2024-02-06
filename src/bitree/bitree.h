@@ -23,15 +23,40 @@ private:
   int rr(node *); // right rotate
   int rc(node *); // recolor
 
+  int add(const T2);
+
+  int del(const T2);
+
 public:
   bitree() { root = nullptr; }
   ~bitree() {}
-  int add(const T2);
-  int add(const T2 *, size_t);
-  int del(const T2);
-  int del(const T2 *, size_t);
+
+bitree& operator << (const T2& value){
+	add(value);
+	return *this;
+}
+
+template <size_t N>
+bitree& operator << (const T2 (&values)[N]){
+    for (size_t i = 0; i < N; i++)
+    	add(values[i]);
+	return *this;
+}
+
+bitree& operator >> (const T2& value){
+	del(value);
+	return *this;
+}
+
+template <size_t N>
+bitree& operator >> (const T2 (&values)[N]){
+    for (size_t i = 0; i < N; i++)
+    	del(values[i]);
+	return *this;
+}
   void show();
 };
+
 
 template <typename T, typename T2> int bitree<T, T2>::add(const T2 value) {
   node *current, *parent, *new_node;
@@ -64,20 +89,13 @@ template <typename T, typename T2> int bitree<T, T2>::add(const T2 value) {
   return 0;
 }
 
-template <typename T, typename T2> int bitree<T, T2>::add(const T2 *values, size_t size) {
-  int exit = 0;
-  for (size_t i = 0; i < size && exit == 0; i++)
-    exit = add(values[i]);
-  return exit;
-}
-
 template <typename T, typename T2> typename bitree<T, T2>::node* bitree<T, T2>::find(const T2 value) {
-  node *iterator = root;
-  while (iterator != nullptr)
-    if (value == iterator->value)
-      return iterator;
+  node *iter = root;
+  while (iter != nullptr)
+    if (value == iter->value)
+      return iter;
     else
-      iterator = value < iterator->value ? iterator->left : iterator->right;
+      iter = value < iter->value ? iter->left : iter->right;
   return 0;
 }
 
@@ -109,26 +127,19 @@ template <typename T, typename T2> int bitree<T, T2>::del(const T2 value) {
 	return 0;
 }
 
-template <typename T, typename T2> int bitree<T, T2>::del(const T2 *values, size_t size) {
-  int exit = 0;
-  for (size_t i = 0; i < size && exit == 0; i++)
-    exit = del(values[i]);
-  return exit;
-}
-
 template <typename T, typename T2> void bitree<T, T2>::show() {
-  node *iterator = root;
+  node *iter = root;
   char code = 0;
   while (code != 'q') {
-    std::cout << iterator->value << "(" << iterator->color << ")";
+    std::cout << iter->value << "(" << iter->color << ")";
     std::cout << std::endl;
     std::cin >> code;
-    if (code == 'l' && iterator->left != nullptr)
-      iterator = iterator->left;
-    if (code == 'r' && iterator->right != nullptr)
-      iterator = iterator->right;
-    if (code == 'u' && iterator->parent != nullptr)
-      iterator = iterator->parent;
+    if (code == 'l' && iter->left != nullptr)
+      iter = iter->left;
+    if (code == 'r' && iter->right != nullptr)
+      iter = iter->right;
+    if (code == 'u' && iter->parent != nullptr)
+      iter = iter->parent;
   }
 }
 

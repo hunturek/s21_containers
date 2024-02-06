@@ -6,7 +6,8 @@ int main() {
                      "Natasha", "Liza",   "Vova",  "Sergey", "Sasha"};
   std::string b[] = {"13", "8", "15", "27", "25", "6", "22", "1", "11", "17"};
   bitree<std::string, int> test;
-  test.add(a, 10);
+  //test.add(a, 10);
+  test << a;
   test.show();
   return 0;
 }
