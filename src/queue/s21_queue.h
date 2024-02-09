@@ -1,5 +1,5 @@
-#ifndef S21_CONTAINERS_S21_QUEUE_H
-#define S21_CONTAINERS_S21_QUEUE_H
+#ifndef S21_CONTAINERS_SRC_QUEUE_S21_QUEUE_H_
+#define S21_CONTAINERS_SRC_QUEUE_S21_QUEUE_H_
 
 #include <iostream>
 #include <stdexcept>
@@ -143,4 +143,4 @@ namespace s21 {
     }
 }   // namespace s21
 
-#endif //S21_CONTAINERS_S21_QUEUE_H
+#endif // S21_CONTAINERS_SRC_QUEUE_S21_QUEUE_H_
