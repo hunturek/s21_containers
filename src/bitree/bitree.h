@@ -6,7 +6,7 @@
 template <typename T, typename T2> class bitree {
 private:
   typedef struct node {
-	T key;
+    T key;
     T2 value;
     node *parent;
     node *left;
@@ -16,6 +16,7 @@ private:
 
   node *root;
 
+  size_t tree_size;
   int add_balance(node *);
   int del_balance(node *);
   node *find(const T2);
@@ -24,39 +25,84 @@ private:
   int rc(node *); // recolor
 
   int add(const T2);
-
   int del(const T2);
 
+  class tree_iterator {
+  private:
+    typename bitree<T, T2>::node *root_node;
+    int next_node();
+    int back_node();
+    int first_node();
+    int last_node();
+    size_t position;
+    size_t *max_position;
+
+  public:
+    int initialize(typename bitree<T, T2>::node *tree_root, size_t *tree_size) { 
+      root_node = tree_root;
+      position = 0;
+      max_position = tree_size;
+      first_node();
+      return 0;
+    }
+
+    typename bitree<T, T2>::node *current_node;
+
+    tree_iterator &operator++() {
+      next_node();
+      return *this;
+    }
+
+    tree_iterator &operator--() {
+      back_node();
+      return *this;
+    }
+
+    tree_iterator &operator<<(int) {
+      first_node();
+      return *this;
+    }
+
+    tree_iterator &operator>>(int) {
+      last_node();
+      return *this;
+    }
+  };
+
 public:
-  bitree() { root = nullptr; }
+
+  tree_iterator iterator;
+  bitree() {
+    root = nullptr;
+    tree_size = 0;
+  }
   ~bitree() {}
 
-bitree& operator << (const T2& value){
-	add(value);
-	return *this;
-}
+  bitree &operator<<(const T2 &value) {
+    if (!add(value))
+      tree_size++;
+    return *this;
+  }
 
-template <size_t N>
-bitree& operator << (const T2 (&values)[N]){
+  template <size_t N> bitree &operator<<(const T2 (&values)[N]) {
     for (size_t i = 0; i < N; i++)
-    	add(values[i]);
-	return *this;
-}
+      this->operator<<(values[i]);
+    return *this;
+  }
 
-bitree& operator >> (const T2& value){
-	del(value);
-	return *this;
-}
+  bitree &operator>>(const T2 &value) {
+    if (!del(value))
+      tree_size--;
+    return *this;
+  }
 
-template <size_t N>
-bitree& operator >> (const T2 (&values)[N]){
+  template <size_t N> bitree &operator>>(const T2 (&values)[N]) {
     for (size_t i = 0; i < N; i++)
-    	del(values[i]);
-	return *this;
-}
+      this->operator>>(values[i]);
+    return *this;
+  }
   void show();
 };
-
 
 template <typename T, typename T2> int bitree<T, T2>::add(const T2 value) {
   node *current, *parent, *new_node;
@@ -89,7 +135,8 @@ template <typename T, typename T2> int bitree<T, T2>::add(const T2 value) {
   return 0;
 }
 
-template <typename T, typename T2> typename bitree<T, T2>::node* bitree<T, T2>::find(const T2 value) {
+template <typename T, typename T2>
+typename bitree<T, T2>::node *bitree<T, T2>::find(const T2 value) {
   node *iter = root;
   while (iter != nullptr)
     if (value == iter->value)
@@ -100,39 +147,43 @@ template <typename T, typename T2> typename bitree<T, T2>::node* bitree<T, T2>::
 }
 
 template <typename T, typename T2> int bitree<T, T2>::del(const T2 value) {
-	node *x, *y, *z = find(value);
-    if (!z || z == nullptr) return 1;
-    if (z->left == nullptr || z->right == nullptr) {
-        y = z;
-    } else {
-        y = z->right;
-        while (y->left != nullptr) y = y->left;
-    }
-    if (y->left != nullptr)
-        x = y->left;
+  node *x, *y, *z = find(value);
+  if (!z || z == nullptr)
+    return 1;
+  if (z->left == nullptr || z->right == nullptr) {
+    y = z;
+  } else {
+    y = z->right;
+    while (y->left != nullptr)
+      y = y->left;
+  }
+  if (y->left != nullptr)
+    x = y->left;
+  else
+    x = y->right;
+  x->parent = y->parent;
+  if (y->parent)
+    if (y == y->parent->left)
+      y->parent->left = x;
     else
-        x = y->right;
-    x->parent = y->parent;
-    if (y->parent)
-        if (y == y->parent->left)
-            y->parent->left = x;
-        else
-            y->parent->right = x;
-    else
-        root = x;
-    if (y != z) z->value = y->value;
-    if (y->color == BLACK)
-        del_balance(x);
-    free(y);
-	return 0;
+      y->parent->right = x;
+  else
+    root = x;
+  if (y != z)
+    z->value = y->value;
+  if (y->color == BLACK)
+    del_balance(x);
+  free(y);
+  return 0;
 }
 
 template <typename T, typename T2> void bitree<T, T2>::show() {
   node *iter = root;
+  iterator.initialize(root, &tree_size);
   char code = 0;
   while (code != 'q') {
-    std::cout << iter->value << "(" << iter->color << ")";
-    std::cout << std::endl;
+    /*std::cout << iter->value << "(" << iter->color << ")";
+    std::cout << std::endl;*/
     std::cin >> code;
     if (code == 'l' && iter->left != nullptr)
       iter = iter->left;
@@ -140,6 +191,10 @@ template <typename T, typename T2> void bitree<T, T2>::show() {
       iter = iter->right;
     if (code == 'u' && iter->parent != nullptr)
       iter = iter->parent;
+    if (code == 'p')
+      std::cout << iterator.current_node->value << std::endl;
+    if (code == 'n')
+      ++iterator;
   }
 }
 
@@ -180,59 +235,59 @@ template <typename T, typename T2> int bitree<T, T2>::add_balance(node *nd) {
 }
 
 template <typename T, typename T2> int bitree<T, T2>::del_balance(node *nd) {
-	 while (nd != root && nd->color == BLACK) {
-        if (nd == nd->parent->left) {
-            node *brother = nd->parent->right;
-            if (brother->color == RED) {
-                brother->color = BLACK;
-                nd->parent->color = RED;
-                lr(nd->parent);
-                brother = nd->parent->right;
-            }
-            if (brother->left->color == BLACK && brother->right->color == BLACK) {
-                brother->color = RED;
-                nd = nd->parent;
-            } else {
-                if (brother->right->color == BLACK) {
-                    brother->left->color = BLACK;
-                    brother->color = RED;
-                    rr(brother);
-                    brother = nd->parent->right;
-                }
-                brother->color = nd->parent->color;
-                nd->parent->color = BLACK;
-                brother->right->color = BLACK;
-                lr(nd->parent);
-                nd = root;
-            }
-        } else {
-            node *brother = nd->parent->left;
-            if (brother->color == RED) {
-                brother->color = BLACK;
-                nd->parent->color = RED;
-                rr(nd->parent);
-                brother = nd->parent->left;
-            }
-            if (brother->right->color == BLACK && brother->left->color == BLACK) {
-                brother->color = RED;
-                nd = nd->parent;
-            } else {
-                if (brother->left->color == BLACK) {
-                    brother->right->color = BLACK;
-                    brother->color = RED;
-                    lr(brother);
-                    brother = nd->parent->left;
-                }
-                brother->color = nd->parent->color;
-                nd->parent->color = BLACK;
-                brother->left->color = BLACK;
-                rr(nd->parent);
-                nd = root;
-            }
+  while (nd != root && nd->color == BLACK) {
+    if (nd == nd->parent->left) {
+      node *brother = nd->parent->right;
+      if (brother->color == RED) {
+        brother->color = BLACK;
+        nd->parent->color = RED;
+        lr(nd->parent);
+        brother = nd->parent->right;
+      }
+      if (brother->left->color == BLACK && brother->right->color == BLACK) {
+        brother->color = RED;
+        nd = nd->parent;
+      } else {
+        if (brother->right->color == BLACK) {
+          brother->left->color = BLACK;
+          brother->color = RED;
+          rr(brother);
+          brother = nd->parent->right;
         }
+        brother->color = nd->parent->color;
+        nd->parent->color = BLACK;
+        brother->right->color = BLACK;
+        lr(nd->parent);
+        nd = root;
+      }
+    } else {
+      node *brother = nd->parent->left;
+      if (brother->color == RED) {
+        brother->color = BLACK;
+        nd->parent->color = RED;
+        rr(nd->parent);
+        brother = nd->parent->left;
+      }
+      if (brother->right->color == BLACK && brother->left->color == BLACK) {
+        brother->color = RED;
+        nd = nd->parent;
+      } else {
+        if (brother->left->color == BLACK) {
+          brother->right->color = BLACK;
+          brother->color = RED;
+          lr(brother);
+          brother = nd->parent->left;
+        }
+        brother->color = nd->parent->color;
+        nd->parent->color = BLACK;
+        brother->left->color = BLACK;
+        rr(nd->parent);
+        nd = root;
+      }
     }
-    nd->color = BLACK;
-	return 0;
+  }
+  nd->color = BLACK;
+  return 0;
 }
 
 template <typename T, typename T2> int bitree<T, T2>::rc(node *nd) {
@@ -287,5 +342,47 @@ template <typename T, typename T2> int bitree<T, T2>::rr(node *nd) {
   cNode->right = pNode;
   if (pNode != nullptr)
     pNode->parent = cNode;
+  return 0;
+}
+
+////--------------------------------------------------------------////
+
+template <typename T, typename T2>
+int bitree<T, T2>::tree_iterator::first_node() {
+  current_node = root_node;
+  while (current_node->left != nullptr)
+    current_node = current_node->left;
+  return 0;
+}
+
+template <typename T, typename T2>
+int bitree<T, T2>::tree_iterator::last_node() {
+  current_node = root_node;
+  while (current_node->right != nullptr)
+    current_node = current_node->right;
+  return 0;
+}
+
+template <typename T, typename T2>
+int bitree<T, T2>::tree_iterator::next_node() {
+  if (current_node->right != nullptr) {
+    current_node = current_node->right;
+    while (current_node->left != nullptr)
+      current_node = current_node->left;
+  } else if (current_node == current_node->parent->left)
+    current_node = current_node->parent;
+  else if (current_node == current_node->parent->right) {
+    current_node = current_node->parent;
+    next_node();
+  } else
+    return 1;
+  return 0;
+}
+
+template <typename T, typename T2>
+int bitree<T, T2>::tree_iterator::back_node() {
+  first_node();
+  for (size_t i = 0; i < position - 1; i++)
+    next_node();
   return 0;
 }
