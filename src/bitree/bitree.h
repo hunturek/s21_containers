@@ -34,15 +34,15 @@ private:
     int back_node();
     int first_node();
     int last_node();
-    size_t position;
     size_t *max_position;
 
   public:
+    size_t position = 0;
     int initialize(typename bitree<T, T2>::node *tree_root, size_t *tree_size) { 
       root_node = tree_root;
-      position = 0;
       max_position = tree_size;
-      first_node();
+      if(position == 0)
+        first_node();
       return 0;
     }
 
@@ -50,21 +50,25 @@ private:
 
     tree_iterator &operator++() {
       next_node();
+      position++;
       return *this;
     }
 
     tree_iterator &operator--() {
       back_node();
+      position--;
       return *this;
     }
 
     tree_iterator &operator<<(int) {
       first_node();
+      position = 0;
       return *this;
     }
 
     tree_iterator &operator>>(int) {
       last_node();
+      position = max_position;
       return *this;
     }
   };
@@ -130,8 +134,8 @@ template <typename T, typename T2> int bitree<T, T2>::add(const T2 value) {
   } else {
     root = new_node;
   }
-
   add_balance(new_node);
+  iterator.initialize(root, &tree_size);
   return 0;
 }
 
@@ -157,12 +161,11 @@ template <typename T, typename T2> int bitree<T, T2>::del(const T2 value) {
     while (y->left != nullptr)
       y = y->left;
   }
-  if (y->left != nullptr)
-    x = y->left;
-  else
+  if (y->right != nullptr){
     x = y->right;
-  x->parent = y->parent;
-  if (y->parent)
+    x->parent = y->parent;
+  }
+  if (x && y->parent)
     if (y == y->parent->left)
       y->parent->left = x;
     else
@@ -174,16 +177,18 @@ template <typename T, typename T2> int bitree<T, T2>::del(const T2 value) {
   if (y->color == BLACK)
     del_balance(x);
   free(y);
+  iterator.initialize(root, &tree_size);
   return 0;
 }
 
 template <typename T, typename T2> void bitree<T, T2>::show() {
   node *iter = root;
-  iterator.initialize(root, &tree_size);
   char code = 0;
   while (code != 'q') {
-    /*std::cout << iter->value << "(" << iter->color << ")";
-    std::cout << std::endl;*/
+    if (code != 'p' && code != 'n' && code != 'b'){
+      std::cout << iter->value << "(" << iter->color << ")";
+      std::cout << std::endl;
+    }
     std::cin >> code;
     if (code == 'l' && iter->left != nullptr)
       iter = iter->left;
@@ -193,8 +198,14 @@ template <typename T, typename T2> void bitree<T, T2>::show() {
       iter = iter->parent;
     if (code == 'p')
       std::cout << iterator.current_node->value << std::endl;
-    if (code == 'n')
+    if (code == 'n'){
       ++iterator;
+      std::cout << iterator.current_node->value << std::endl;
+    }
+    if (code == 'b'){
+      --iterator;
+      std::cout << iterator.current_node->value << std::endl;
+    }
   }
 }
 
@@ -372,8 +383,12 @@ int bitree<T, T2>::tree_iterator::next_node() {
   } else if (current_node == current_node->parent->left)
     current_node = current_node->parent;
   else if (current_node == current_node->parent->right) {
-    current_node = current_node->parent;
-    next_node();
+    while(current_node != root_node && current_node == current_node->parent->right)
+        current_node = current_node->parent;
+    if(current_node != root_node)
+      current_node = current_node->parent;
+    else
+      first_node();
   } else
     return 1;
   return 0;
@@ -381,8 +396,14 @@ int bitree<T, T2>::tree_iterator::next_node() {
 
 template <typename T, typename T2>
 int bitree<T, T2>::tree_iterator::back_node() {
-  first_node();
-  for (size_t i = 0; i < position - 1; i++)
-    next_node();
+  if(position == 0){
+    position = *max_position;
+    last_node();
+  }
+  else {
+    first_node();
+    for (size_t i = 0; i < position - 1; i++)
+      next_node();
+  }
   return 0;
 }

@@ -9,5 +9,10 @@ int main() {
   //test.add(a, 10);
   test << a;
   test.show();
+  ++test.iterator;
+  test << 75;
+  test.show();
+  test >> 69;
+  test.show();
   return 0;
 }
