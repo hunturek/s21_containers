@@ -1,18 +1,33 @@
 #include "bitree.h"
 
 int main() {
-  int a[] = {59,5,27,34,45,56,73,91,10,19,31,50,78,85,14,40,65,82,24,69,62};
-  std::string c[] = {"Denis",   "Nastya", "Basil", "Larisa", "Olya",
-                     "Natasha", "Liza",   "Vova",  "Sergey", "Sasha"};
-  std::string b[] = {"13", "8", "15", "27", "25", "6", "22", "1", "11", "17"};
-  bitree<std::string, int> test;
-  //test.add(a, 10);
+  std::initializer_list<std::pair<int, char>> a{
+  {59,'a'},
+  {5,'f'},
+  {27,'e'},
+  {34,'c'},
+  {45,'q'},
+  {56,'g'},
+  {73,'s'},
+  {91,'t'},
+  {10,'x'},
+  {19,'z'},
+  {31,'b'},
+  {50,'u'},
+  {78,'j'},
+  {85,'l'},
+  {14,'v'},
+  {40,'o'},
+  {65,'n'},
+  {82,'d'},
+  {24,'d'},
+  {69,'d'},
+  {62,'d'}};
+  bitree<int, char> test;
   test << a;
   test.show();
   ++test.iterator;
-  test << 75;
   test.show();
-  test >> 69;
-  test.show();
+  test.clear();
   return 0;
 }

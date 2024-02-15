@@ -6,8 +6,8 @@
 template <typename T, typename T2> class bitree {
 private:
   typedef struct node {
-    T key;
-    T2 value;
+    T2 value2;
+    T value;
     node *parent;
     node *left;
     node *right;
@@ -19,13 +19,14 @@ private:
   size_t tree_size;
   int add_balance(node *);
   int del_balance(node *);
-  node *find(const T2);
+  node *find(const T);
   int lr(node *); // left rotate
   int rr(node *); // right rotate
   int rc(node *); // recolor
 
-  int add(const T2);
-  int del(const T2);
+  int add(std::pair<const T, T2>);
+  int del(const T);
+  void clear(node *);
 
   class tree_iterator {
   private:
@@ -38,6 +39,8 @@ private:
 
   public:
     size_t position = 0;
+    typename bitree<T, T2>::node *get();
+    typename bitree<T, T2>::node cget();
     int initialize(typename bitree<T, T2>::node *tree_root, size_t *tree_size) { 
       root_node = tree_root;
       max_position = tree_size;
@@ -71,6 +74,11 @@ private:
       position = max_position;
       return *this;
     }
+
+    tree_iterator &operator=(tree_iterator &other) {
+      current_node = other.get();
+      return *this;
+    }
   };
 
 public:
@@ -80,54 +88,57 @@ public:
     root = nullptr;
     tree_size = 0;
   }
-  ~bitree() {}
+  ~bitree() {clear();}
 
-  bitree &operator<<(const T2 &value) {
+  bitree &operator<<(const std::pair<T, T2> &value) {
     if (!add(value))
       tree_size++;
     return *this;
   }
 
-  template <size_t N> bitree &operator<<(const T2 (&values)[N]) {
-    for (size_t i = 0; i < N; i++)
-      this->operator<<(values[i]);
+  bitree &operator<<(std::initializer_list<std::pair<T, T2>> values) {
+    for (typename std::initializer_list<std::pair<T, T2>>::iterator it = values.begin(); it != values.end(); ++it)
+      this->operator<<(*it);
     return *this;
   }
 
-  bitree &operator>>(const T2 &value) {
+  bitree &operator>>(const T &value) {
     if (!del(value))
       tree_size--;
     return *this;
   }
 
-  template <size_t N> bitree &operator>>(const T2 (&values)[N]) {
+  template <size_t N> bitree &operator>>(const T (&values)[N]) {
     for (size_t i = 0; i < N; i++)
       this->operator>>(values[i]);
     return *this;
   }
   void show();
+  void clear();
+  T2 *find_value(T);
 };
 
-template <typename T, typename T2> int bitree<T, T2>::add(const T2 value) {
+template <typename T, typename T2> int bitree<T, T2>::add(std::pair<const T, T2> value) {
   node *current, *parent, *new_node;
   current = root;
   parent = nullptr;
   while (current != nullptr) {
-    if (value == current->value)
+    if (value.first == current->value)
       return 1;
     parent = current;
-    current = value < current->value ? current->left : current->right;
+    current = value.first < current->value ? current->left : current->right;
   }
 
   new_node = new node;
-  new_node->value = value;
+  new_node->value = value.first;
+  new_node->value2 = value.second;
   new_node->parent = parent;
   new_node->left = nullptr;
   new_node->right = nullptr;
   new_node->color = RED;
 
   if (parent) {
-    if (value < parent->value)
+    if (value.first < parent->value)
       parent->left = new_node;
     else
       parent->right = new_node;
@@ -140,7 +151,7 @@ template <typename T, typename T2> int bitree<T, T2>::add(const T2 value) {
 }
 
 template <typename T, typename T2>
-typename bitree<T, T2>::node *bitree<T, T2>::find(const T2 value) {
+typename bitree<T, T2>::node *bitree<T, T2>::find(const T value) {
   node *iter = root;
   while (iter != nullptr)
     if (value == iter->value)
@@ -150,7 +161,18 @@ typename bitree<T, T2>::node *bitree<T, T2>::find(const T2 value) {
   return 0;
 }
 
-template <typename T, typename T2> int bitree<T, T2>::del(const T2 value) {
+template <typename T, typename T2>
+T2 *bitree<T, T2>::find_value(T value) {
+  node *iter = root;
+  while (iter != nullptr)
+    if (value == iter->value)
+      return *iter->value2;
+    else
+      iter = value < iter->value ? iter->left : iter->right;
+  return 0;
+}
+
+template <typename T, typename T2> int bitree<T, T2>::del(const T value) {
   node *x, *y, *z = find(value);
   if (!z || z == nullptr)
     return 1;
@@ -356,6 +378,20 @@ template <typename T, typename T2> int bitree<T, T2>::rr(node *nd) {
   return 0;
 }
 
+template <typename T, typename T2> void bitree<T, T2>::clear(node *tmp) {
+  if(tmp != nullptr){
+    node *left = tmp->left;
+    node *right = tmp->right;
+    delete tmp;
+    clear(left);
+    clear(right);
+  }
+}
+
+template <typename T, typename T2> void bitree<T, T2>::clear() {
+  clear(root);
+}
+
 ////--------------------------------------------------------------////
 
 template <typename T, typename T2>
@@ -406,4 +442,14 @@ int bitree<T, T2>::tree_iterator::back_node() {
       next_node();
   }
   return 0;
+}
+
+template <typename T, typename T2>
+typename bitree<T, T2>::node *bitree<T, T2>::tree_iterator::get() {
+  return current_node;
+}
+
+template <typename T, typename T2>
+typename bitree<T, T2>::node bitree<T, T2>::tree_iterator::cget() {
+  return current_node;
 }
