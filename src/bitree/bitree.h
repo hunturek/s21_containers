@@ -41,6 +41,7 @@ private:
     size_t position = 0;
     typename bitree<T, T2>::node *get();
     typename bitree<T, T2>::node cget();
+    void set(const T);
     int initialize(typename bitree<T, T2>::node *tree_root, size_t *tree_size) { 
       root_node = tree_root;
       max_position = tree_size;
@@ -113,8 +114,18 @@ public:
       this->operator>>(values[i]);
     return *this;
   }
+
+  bitree &operator|(const bitree &other) { //swap
+    node *tmp = this.root;
+    this.root = other.get_root();
+    other.set_root(tmp);
+    return *this;
+  }
+
   void show();
   void clear();
+  node *get_root();
+  void set_root(node *);
   T2 *find_value(T);
 };
 
@@ -148,6 +159,16 @@ template <typename T, typename T2> int bitree<T, T2>::add(std::pair<const T, T2>
   add_balance(new_node);
   iterator.initialize(root, &tree_size);
   return 0;
+}
+
+template <typename T, typename T2>
+typename bitree<T, T2>::node *bitree<T, T2>::get_root() {
+  return root;
+}
+
+template <typename T, typename T2>
+void bitree<T, T2>::set_root(node *new_root) {
+  root = new_root;
 }
 
 template <typename T, typename T2>
@@ -452,4 +473,11 @@ typename bitree<T, T2>::node *bitree<T, T2>::tree_iterator::get() {
 template <typename T, typename T2>
 typename bitree<T, T2>::node bitree<T, T2>::tree_iterator::cget() {
   return current_node;
+}
+
+template <typename T, typename T2>
+void bitree<T, T2>::tree_iterator::set(const T value){
+  first_node();
+  while(current_node.value != value && position != *max_position)
+    next_node();
 }
