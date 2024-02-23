@@ -1,3 +1,5 @@
+#ifndef BITREE_H
+#define BITREE_H
 #include <iostream>
 
 #define RED 1
@@ -16,7 +18,6 @@ private:
 
   node *root;
 
-  size_t tree_size;
   int add_balance(node *);
   int del_balance(node *);
   node *find(const T);
@@ -39,8 +40,12 @@ private:
 
   public:
     size_t position = 0;
-    typename bitree<T, T2>::node *get();
-    typename bitree<T, T2>::node cget();
+    const T& cget() const {
+            return current_node->value;
+        }
+    T& get() {
+            return current_node->value;
+        }
     void set(const T);
     int initialize(typename bitree<T, T2>::node *tree_root, size_t *tree_size) { 
       root_node = tree_root;
@@ -89,6 +94,10 @@ public:
     root = nullptr;
     tree_size = 0;
   }
+  bitree(const bitree &other){
+    root = other.get_root();
+    tree_size = other.get_size();
+  }
   ~bitree() {clear();}
 
   bitree &operator<<(const std::pair<T, T2> &value) {
@@ -98,10 +107,11 @@ public:
   }
 
   bitree &operator<<(std::initializer_list<std::pair<T, T2>> values) {
-    for (typename std::initializer_list<std::pair<T, T2>>::iterator it = values.begin(); it != values.end(); ++it)
-      this->operator<<(*it);
+    for (const auto& value : values)
+        add(value);
+    tree_size += values.size();
     return *this;
-  }
+}
 
   bitree &operator>>(const T &value) {
     if (!del(value))
@@ -122,11 +132,14 @@ public:
     return *this;
   }
 
+  size_t tree_size;
   void show();
   void clear();
   node *get_root();
   void set_root(node *);
-  T2 *find_value(T);
+  void move(const bitree &other);
+  size_t get_size();
+  T2& find_value(T);
 };
 
 template <typename T, typename T2> int bitree<T, T2>::add(std::pair<const T, T2> value) {
@@ -183,15 +196,18 @@ typename bitree<T, T2>::node *bitree<T, T2>::find(const T value) {
 }
 
 template <typename T, typename T2>
-T2 *bitree<T, T2>::find_value(T value) {
+T2& bitree<T, T2>::find_value(T value) {
   node *iter = root;
-  while (iter != nullptr)
-    if (value == iter->value)
-      return *iter->value2;
-    else
+  while (iter != nullptr) {
+    if (value == iter->value) {
+      return iter->value2;
+    } else {
       iter = value < iter->value ? iter->left : iter->right;
-  return 0;
+    }
+  }
+  throw std::out_of_range("Key not found");
 }
+
 
 template <typename T, typename T2> int bitree<T, T2>::del(const T value) {
   node *x, *y, *z = find(value);
@@ -400,10 +416,11 @@ template <typename T, typename T2> int bitree<T, T2>::rr(node *nd) {
 }
 
 template <typename T, typename T2> void bitree<T, T2>::clear(node *tmp) {
-  if(tmp != nullptr){
+  if(tmp != nullptr && tree_size != 0){
     node *left = tmp->left;
     node *right = tmp->right;
     delete tmp;
+    tree_size--;
     clear(left);
     clear(right);
   }
@@ -411,6 +428,16 @@ template <typename T, typename T2> void bitree<T, T2>::clear(node *tmp) {
 
 template <typename T, typename T2> void bitree<T, T2>::clear() {
   clear(root);
+}
+
+template <typename T, typename T2> void bitree<T, T2>::move(const bitree &other) {
+  root = other.get_root();
+  tree_size = other.get_size();
+  other.set_root(nullptr);
+}
+
+template <typename T, typename T2> size_t bitree<T, T2>::get_size() {
+  return tree_size;
 }
 
 ////--------------------------------------------------------------////
@@ -466,18 +493,10 @@ int bitree<T, T2>::tree_iterator::back_node() {
 }
 
 template <typename T, typename T2>
-typename bitree<T, T2>::node *bitree<T, T2>::tree_iterator::get() {
-  return current_node;
-}
-
-template <typename T, typename T2>
-typename bitree<T, T2>::node bitree<T, T2>::tree_iterator::cget() {
-  return current_node;
-}
-
-template <typename T, typename T2>
 void bitree<T, T2>::tree_iterator::set(const T value){
   first_node();
-  while(current_node.value != value && position != *max_position)
+  while(current_node->value != value && position != *max_position)
     next_node();
 }
+
+#endif //BITREE_H

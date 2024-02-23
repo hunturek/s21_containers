@@ -1,6 +1,8 @@
 #include <iostream>
 #include "../bitree/bitree.h"
 
+namespace s21 {
+
 template <typename Key, typename T> class map {
 private:
   using key_type = Key;
@@ -12,35 +14,47 @@ private:
 
 public:
   map() {};
-  map(std::initializer_list<value_type> const &items) {
-    tree << items;
+  map(std::initializer_list<value_type> const& items){
+    for (const auto& item : items) {
+        tree << item;
+    }
   };
-  /*map(const map &m) {};
-  map(const map &&m) {};
-  ~map() {};
-  map &operator=(map &&m) {
-    map(m);
+  map(const map& other) : tree(other.tree) {}
+  map(map&& other) noexcept : tree(std::move(other.tree)) {}
+  ~map() {tree.clear();}
+  map& operator=(map&& other) noexcept {
+    if (this != &other) {
+      tree = std::move(other.tree);
+    }
     return *this;
-  }*/
+  }
+
+  map& operator=(std::initializer_list<value_type> const& items) {
+    tree.clear();
+    for (const auto& item : items) {
+        tree << item;
+    }
+    return *this;
+  }
 
   T& at(const Key& key) {
     try {
       return tree.find_value(key);
     } catch (const std::out_of_range& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
+        static T default_value{};
+        return default_value;
     }
-  };
-  map &operator[](const Key& key) {
+  }
+  T& operator[](const Key& key) {
     try {
-      T tmp = tree.find_value(key);
-      if(!tmp)
-        return tmp;
-      else
-        throw(tmp);
-    } catch (T tmp) {
-      tree << std::pair<Key, T>{key,tmp};
+        return tree.find_value(key);
+    } catch (const std::out_of_range& e) {
+        T tmp;
+        tree << std::pair<Key, T>{key, tmp};
+        return tree.find_value(key);
     }
-  };
+  }
 
   map &operator++() {
     ++tree.iterator;
@@ -59,7 +73,7 @@ public:
   }
 
   bool empty() {
-    if(tree.root == nullptr)
+    if(tree.get_root() == nullptr)
       return true;
     else
       return false;
@@ -95,10 +109,31 @@ public:
     return true;
   }
   void erase() {
-    tree >> tree.iterator.get();
+    tree >> tree.iterator.cget();
+  }
+  void merge(map& other) {
+    other.begin();
+    for(size_type i = 0; i < other.size(); i++){
+      this->operator[](other.const_iterator()) = other.at(other.const_iterator());
+      ++other;
+    }
+  }
+
+  Key& iterator(){
+    return tree.iterator.get();
+  }
+  const Key& const_iterator(){
+    return tree.iterator.cget();
   }
 
   bool contains(const Key& key) {
-    return !tree.find_value(key);
+  try {
+    tree.find_value(key);
+    return true;
+    } catch (const std::out_of_range& e) {
+      return false;
+    }
   }
 };
+
+}
