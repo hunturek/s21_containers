@@ -5,6 +5,8 @@
 #define RED 1
 #define BLACK 0
 
+namespace s21 {
+
 template <typename T, typename T2> class bitree {
 private:
   typedef struct node {
@@ -27,6 +29,7 @@ private:
 
   int add(std::pair<const T, T2>);
   int del(const T);
+  node *copy_nodes(const node *src_node);
   void clear(node *);
 
   class tree_iterator {
@@ -40,17 +43,13 @@ private:
 
   public:
     size_t position = 0;
-    const T& cget() const {
-            return current_node->value;
-        }
-    T& get() {
-            return current_node->value;
-        }
+    const T &cget() const { return current_node->value; }
+    T &get() { return current_node->value; }
     void set(const T);
-    int initialize(typename bitree<T, T2>::node *tree_root, size_t *tree_size) { 
+    int initialize(typename bitree<T, T2>::node *tree_root, size_t *tree_size) {
       root_node = tree_root;
       max_position = tree_size;
-      if(position == 0)
+      if (position == 0)
         first_node();
       return 0;
     }
@@ -88,17 +87,16 @@ private:
   };
 
 public:
-
   tree_iterator iterator;
   bitree() {
     root = nullptr;
     tree_size = 0;
   }
-  bitree(const bitree &other){
-    root = other.get_root();
+  bitree(const bitree &other) {
+    root = copy_nodes(other.get_root());
     tree_size = other.get_size();
   }
-  ~bitree() {clear();}
+  ~bitree() { clear(); }
 
   bitree &operator<<(const std::pair<T, T2> &value) {
     if (!add(value))
@@ -107,11 +105,11 @@ public:
   }
 
   bitree &operator<<(std::initializer_list<std::pair<T, T2>> values) {
-    for (const auto& value : values)
-        add(value);
+    for (const auto &value : values)
+      add(value);
     tree_size += values.size();
     return *this;
-}
+  }
 
   bitree &operator>>(const T &value) {
     if (!del(value))
@@ -125,24 +123,37 @@ public:
     return *this;
   }
 
-  bitree &operator|(const bitree &other) { //swap
+  bitree &operator|(const bitree &other) { // swap
     node *tmp = this.root;
     this.root = other.get_root();
     other.set_root(tmp);
     return *this;
   }
 
+  bitree &operator=(bitree &&other) noexcept {
+    if (this != &other) {
+      clear();
+      root = other.get_root();
+      tree_size = other.tree_size;
+
+      other.set_root(nullptr);
+      other.tree_size = 0;
+    }
+    return *this;
+  }
+
   size_t tree_size;
   void show();
   void clear();
-  node *get_root();
+  node *get_root() const;
   void set_root(node *);
   void move(const bitree &other);
-  size_t get_size();
-  T2& find_value(T);
+  size_t get_size() const;
+  T2 &find_value(T);
 };
 
-template <typename T, typename T2> int bitree<T, T2>::add(std::pair<const T, T2> value) {
+template <typename T, typename T2>
+int bitree<T, T2>::add(std::pair<const T, T2> value) {
   node *current, *parent, *new_node;
   current = root;
   parent = nullptr;
@@ -175,7 +186,7 @@ template <typename T, typename T2> int bitree<T, T2>::add(std::pair<const T, T2>
 }
 
 template <typename T, typename T2>
-typename bitree<T, T2>::node *bitree<T, T2>::get_root() {
+typename bitree<T, T2>::node *bitree<T, T2>::get_root() const {
   return root;
 }
 
@@ -195,8 +206,7 @@ typename bitree<T, T2>::node *bitree<T, T2>::find(const T value) {
   return 0;
 }
 
-template <typename T, typename T2>
-T2& bitree<T, T2>::find_value(T value) {
+template <typename T, typename T2> T2 &bitree<T, T2>::find_value(T value) {
   node *iter = root;
   while (iter != nullptr) {
     if (value == iter->value) {
@@ -207,7 +217,6 @@ T2& bitree<T, T2>::find_value(T value) {
   }
   throw std::out_of_range("Key not found");
 }
-
 
 template <typename T, typename T2> int bitree<T, T2>::del(const T value) {
   node *x, *y, *z = find(value);
@@ -220,7 +229,7 @@ template <typename T, typename T2> int bitree<T, T2>::del(const T value) {
     while (y->left != nullptr)
       y = y->left;
   }
-  if (y->right != nullptr){
+  if (y->right != nullptr) {
     x = y->right;
     x->parent = y->parent;
   }
@@ -240,11 +249,31 @@ template <typename T, typename T2> int bitree<T, T2>::del(const T value) {
   return 0;
 }
 
+template <typename T, typename T2>
+typename bitree<T, T2>::node *
+bitree<T, T2>::copy_nodes(const typename bitree<T, T2>::node *src_node) {
+  if (!src_node) {
+    return nullptr;
+  }
+  typename bitree<T, T2>::node *new_node = new node;
+  new_node->value = src_node->value;
+  new_node->value2 = src_node->value2;
+  new_node->parent = nullptr;
+  new_node->left = nullptr;
+  new_node->right = nullptr;
+  new_node->color = src_node->color;
+
+  new_node->left = copy_nodes(src_node->left);
+  new_node->right = copy_nodes(src_node->right);
+
+  return new_node;
+}
+
 template <typename T, typename T2> void bitree<T, T2>::show() {
   node *iter = root;
   char code = 0;
   while (code != 'q') {
-    if (code != 'p' && code != 'n' && code != 'b'){
+    if (code != 'p' && code != 'n' && code != 'b') {
       std::cout << iter->value << "(" << iter->color << ")";
       std::cout << std::endl;
     }
@@ -257,11 +286,11 @@ template <typename T, typename T2> void bitree<T, T2>::show() {
       iter = iter->parent;
     if (code == 'p')
       std::cout << iterator.current_node->value << std::endl;
-    if (code == 'n'){
+    if (code == 'n') {
       ++iterator;
       std::cout << iterator.current_node->value << std::endl;
     }
-    if (code == 'b'){
+    if (code == 'b') {
       --iterator;
       std::cout << iterator.current_node->value << std::endl;
     }
@@ -416,7 +445,7 @@ template <typename T, typename T2> int bitree<T, T2>::rr(node *nd) {
 }
 
 template <typename T, typename T2> void bitree<T, T2>::clear(node *tmp) {
-  if(tmp != nullptr && tree_size != 0){
+  if (tmp != nullptr && tree_size != 0) {
     node *left = tmp->left;
     node *right = tmp->right;
     delete tmp;
@@ -426,17 +455,16 @@ template <typename T, typename T2> void bitree<T, T2>::clear(node *tmp) {
   }
 }
 
-template <typename T, typename T2> void bitree<T, T2>::clear() {
-  clear(root);
-}
+template <typename T, typename T2> void bitree<T, T2>::clear() { clear(root); }
 
-template <typename T, typename T2> void bitree<T, T2>::move(const bitree &other) {
+template <typename T, typename T2>
+void bitree<T, T2>::move(const bitree &other) {
   root = other.get_root();
   tree_size = other.get_size();
   other.set_root(nullptr);
 }
 
-template <typename T, typename T2> size_t bitree<T, T2>::get_size() {
+template <typename T, typename T2> size_t bitree<T, T2>::get_size() const {
   return tree_size;
 }
 
@@ -467,9 +495,10 @@ int bitree<T, T2>::tree_iterator::next_node() {
   } else if (current_node == current_node->parent->left)
     current_node = current_node->parent;
   else if (current_node == current_node->parent->right) {
-    while(current_node != root_node && current_node == current_node->parent->right)
-        current_node = current_node->parent;
-    if(current_node != root_node)
+    while (current_node != root_node &&
+           current_node == current_node->parent->right)
+      current_node = current_node->parent;
+    if (current_node != root_node)
       current_node = current_node->parent;
     else
       first_node();
@@ -480,11 +509,10 @@ int bitree<T, T2>::tree_iterator::next_node() {
 
 template <typename T, typename T2>
 int bitree<T, T2>::tree_iterator::back_node() {
-  if(position == 0){
+  if (position == 0) {
     position = *max_position;
     last_node();
-  }
-  else {
+  } else {
     first_node();
     for (size_t i = 0; i < position - 1; i++)
       next_node();
@@ -493,10 +521,12 @@ int bitree<T, T2>::tree_iterator::back_node() {
 }
 
 template <typename T, typename T2>
-void bitree<T, T2>::tree_iterator::set(const T value){
+void bitree<T, T2>::tree_iterator::set(const T value) {
   first_node();
-  while(current_node->value != value && position != *max_position)
+  while (current_node->value != value && position != *max_position)
     next_node();
 }
 
-#endif //BITREE_H
+} // namespace s21
+
+#endif // BITREE_H

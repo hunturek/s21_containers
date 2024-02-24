@@ -18,6 +18,8 @@ int main() {
     {13, "Masha"}
   };
 
+  s21::map<int, std::string> mp2(mp);
+
   std::string value = mp.at(2);
   std::cout << "Value for key 2: " << value << std::endl;
   
