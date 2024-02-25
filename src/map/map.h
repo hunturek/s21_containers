@@ -105,7 +105,7 @@ public:
   }
   bool insert_or_assign(const Key& key, const T& obj) {
     if(contains(key))
-      this[key] = obj;
+      this->operator[](key) = obj;
     else
       tree << std::make_pair(key, obj);
     return true;

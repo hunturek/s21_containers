@@ -76,7 +76,7 @@ private:
 
     tree_iterator &operator>>(int) {
       last_node();
-      position = max_position;
+      position = *max_position;
       return *this;
     }
 
@@ -455,7 +455,10 @@ template <typename T, typename T2> void bitree<T, T2>::clear(node *tmp) {
   }
 }
 
-template <typename T, typename T2> void bitree<T, T2>::clear() { clear(root); }
+template <typename T, typename T2> void bitree<T, T2>::clear() { clear(root); 
+  tree_size = 0;
+  root = nullptr;
+}
 
 template <typename T, typename T2>
 void bitree<T, T2>::move(const bitree &other) {
