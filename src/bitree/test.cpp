@@ -1,4 +1,4 @@
-#include "bitree.h"
+#include "bitree2.h"
 
 int main() {
   std::initializer_list<std::pair<int, char>> a{
@@ -23,11 +23,12 @@ int main() {
   {24,'d'},
   {69,'d'},
   {62,'d'}};
-  bitree<int, char> test;
+  s21::bitree<int, char> test;
   test << a;
-  test.show();
-  ++test.iterator;
-  test.show();
+    //s21::bitree<int, char>::tree_iterator it = test.begin();
+    for(s21::bitree<int, char>::tree_iterator it = test.begin(); it != test.end(); ++it) {
+        std::cout << it.get() << std::endl;
+    }
   test.clear();
   return 0;
 }
