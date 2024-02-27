@@ -26,9 +26,11 @@ int main() {
   s21::bitree<int, char> test;
   test << a;
     //s21::bitree<int, char>::tree_iterator it = test.begin();
-    for(s21::bitree<int, char>::tree_iterator it = test.begin(); it != test.end(); ++it) {
+    s21::bitree<int, char>::tree_iterator it = test.begin();
+    for(it; it != test.end(); ++it) {
         std::cout << it.get() << std::endl;
     }
+  std::cout << it.get() << std::endl;
   test.clear();
   return 0;
 }

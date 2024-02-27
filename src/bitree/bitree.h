@@ -32,17 +32,22 @@ private:
   node *copy_nodes(const node *src_node);
   void clear(node *);
 
+
+public:
+
+//---------ITERATOR---------------------------------------------------
+
   class tree_iterator {
   private:
     typename bitree<T, T2>::node *root_node;
     int next_node();
     int back_node();
-    int first_node();
-    int last_node();
     size_t *max_position;
 
   public:
     size_t position = 0;
+    int first_node();
+    int last_node();
     const T &cget() const { return current_node->value; }
     T &get() { return current_node->value; }
     void set(const T);
@@ -66,19 +71,11 @@ private:
       back_node();
       position--;
       return *this;
-    }
 
-    tree_iterator &operator<<(int) {
-      first_node();
-      position = 0;
-      return *this;
-    }
-
-    tree_iterator &operator>>(int) {
-      last_node();
-      position = *max_position;
-      return *this;
-    }
+    std::ostream& operator<<(std::ostream& os, const typename bitree<T, T2>::tree_iterator& it) {
+  os << it.get();
+  return os;
+}
 
     tree_iterator &operator=(tree_iterator &other) {
       current_node = other.get();
@@ -86,8 +83,8 @@ private:
     }
   };
 
-public:
-  tree_iterator iterator;
+//--------------------------------------------------------------------
+
   bitree() {
     root = nullptr;
     tree_size = 0;
@@ -150,6 +147,8 @@ public:
   void move(const bitree &other);
   size_t get_size() const;
   T2 &find_value(T);
+  typename bitree<T, T2>::tree_iterator begin();
+  typename bitree<T, T2>::tree_iterator end();
 };
 
 template <typename T, typename T2>
@@ -470,6 +469,22 @@ void bitree<T, T2>::move(const bitree &other) {
 template <typename T, typename T2> size_t bitree<T, T2>::get_size() const {
   return tree_size;
 }
+
+template <typename T, typename T2>
+  typename bitree<T, T2>::tree_iterator bitree<T, T2>::begin() {
+    tree_iterator iter;
+    iter.initialize(root, &tree_size);
+    iter.first_node();
+    return iter;
+  }
+
+template <typename T, typename T2>
+  typename bitree<T, T2>::tree_iterator bitree<T, T2>::end() {
+    tree_iterator iter;
+    iter.initialize(root, &tree_size);
+    iter.last.node();
+    return iter;
+  }
 
 ////--------------------------------------------------------------////
 

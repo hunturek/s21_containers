@@ -88,7 +88,7 @@ public:
         size_t *max_position;
         
     public:
-        size_t position = 0;
+        size_t position = 1;
         int first_node();
         int last_node();
         const T &cget() const { return current_node->value; }
@@ -472,12 +472,12 @@ public:
 
   template <typename T, typename T2>
   int bitree<T, T2>::tree_iterator::back_node() {
-    if (position == 0) {
+    if (position == 1) {
       position = *max_position;
       last_node();
     } else {
       first_node();
-      for (size_t i = 0; i < position - 1; i++)
+      for (size_t i = 1; i < position; i++)
         next_node();
     }
     return 0;
