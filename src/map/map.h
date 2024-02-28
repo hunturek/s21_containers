@@ -15,6 +15,7 @@ private:
   bitree<Key, T> tree;
 
 public:
+  using iterator = typename bitree<Key, T>::tree_iterator;
   map() {};
   map(std::initializer_list<value_type> const& items){
     for (const auto& item : items) {
@@ -58,20 +59,11 @@ public:
     }
   }
 
-  map &operator++() {
-    ++tree.iterator;
-    return *this;
+  iterator begin() {
+    return tree.begin();
   }
-  map &operator--() {
-    --tree.iterator;
-    return *this;
-  }
-
-  void begin() {
-    tree.iterator<<1;
-  }
-  void end() {
-    tree.iterator>>1;
+  iterator end() {
+    return tree.end();
   }
 
   bool empty() {
@@ -90,42 +82,38 @@ public:
   void clear() {
     tree.clear();
   }
-  bool insert(const value_type& value) {
+  std::pair<iterator, bool> insert(const value_type& value) {
+    iterator it = tree.begin();
     if(contains(value.first))
-      return false;
+      return {it.set(value.first), false};
     tree << value;
-    tree.iterator.set(value.first);
-    return true;
+    return {it.set(value.first), true};
   }
-  bool insert(const Key& key, const T& obj) {
+  std::pair<iterator, bool> insert(const Key& key, const T& obj) {
+    iterator it = tree.begin();
     if(contains(key))
-      return false;
+      return {it.set(key), false};
     tree << std::make_pair(key, obj);
-    return true;
+    return {it.set(key), true};
   }
-  bool insert_or_assign(const Key& key, const T& obj) {
-    if(contains(key))
+  std::pair<iterator, bool> insert_or_assign(const Key& key, const T& obj) {
+    iterator it = tree.begin();
+    if(contains(key)){
       this->operator[](key) = obj;
-    else
-      tree << std::make_pair(key, obj);
-    return true;
+      return {it.set(key), false};
+    }
+    tree << std::make_pair(key, obj);
+    return {it.set(key), true};
   }
-  void erase() {
-    tree >> tree.iterator.cget();
+  void erase(iterator it) {
+    tree >> it.cget();
   }
   void merge(map& other) {
-    other.begin();
+    iterator it = other.begin();
     for(size_type i = 0; i < other.size(); i++){
-      this->operator[](other.const_iterator()) = other.at(other.const_iterator());
-      ++other;
+      this->operator[](it.cget()) = other.at(it.cget());
+      ++it;
     }
-  }
-
-  Key& iterator(){
-    return tree.iterator.get();
-  }
-  const Key& const_iterator(){
-    return tree.iterator.cget();
   }
 
   bool contains(const Key& key) {

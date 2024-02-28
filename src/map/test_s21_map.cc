@@ -159,19 +159,18 @@ TEST(s21_map, iterator) {
     {47, "Lasha"},
     {13, "Masha"}
   };
-  m.begin();
-  ASSERT_EQ(02, m.iterator());
-  ++m;
-  ASSERT_EQ(12, m.iterator());
-  ++m;
-  ASSERT_EQ(13, m.iterator());
-  m.end();
-  ASSERT_EQ(93, m.iterator());
-  ++m;
-  ASSERT_EQ(02, m.iterator());
-  --m;
-  --m;
-  ASSERT_EQ(93, m.iterator());
+  s21::map<int, std::string>::iterator it = m.begin();
+  ASSERT_EQ(02, it.cget());
+  ++it;
+  ASSERT_EQ(12, it.cget());
+  ++it;
+  ASSERT_EQ(13, it.cget());
+  it.last_node();
+  ASSERT_EQ(93, it.cget());
+  ++it;
+  ASSERT_EQ(02, it.cget());
+  --it;
+  ASSERT_EQ(93, it.cget());
 }
 
 TEST(s21_map, clear) {
@@ -214,12 +213,19 @@ TEST(s21_map, insert) {
     {47, "Lasha"},
     {13, "Masha"}
   };
-  m.insert(std::make_pair((int)40, (std::string)"Valentina"));
-  ASSERT_EQ("Valentina", m.at(40));
-  m.insert((int)41, (std::string)"Stas");
-  ASSERT_EQ("Stas", m.at(41));
-  m.insert_or_assign((int)40, (std::string)"Valya");
-  ASSERT_EQ("Valya", m.at(40));
+  s21::map<int, std::string>::iterator it = m.begin();
+  auto res1 = m.insert(std::make_pair(40, "Valentina"));
+  ASSERT_EQ(res1, std::make_pair(it.set(40), true));
+  auto res2 = m.insert(41, "Stas");
+  ASSERT_EQ(res2, std::make_pair(it.set(41), true));
+  auto res3 = m.insert(std::make_pair(40, "Valya"));
+  ASSERT_EQ(res3, std::make_pair(it.set(40), false));
+  ASSERT_EQ(m.at(40), "Valentina");
+  auto res4 = m.insert_or_assign(42, "Olga");
+  ASSERT_EQ(res4, std::make_pair(it.set(42), true));
+  auto res5 = m.insert_or_assign(40, "Valya");
+  ASSERT_EQ(res5, std::make_pair(it.set(40), false));
+  ASSERT_EQ(m.at(40), "Valya");
 }
 
 TEST(s21_map, erase) {
@@ -239,15 +245,15 @@ TEST(s21_map, erase) {
     {47, "Lasha"},
     {13, "Masha"}
   };
-  m.begin();
-  ++m;
-  ++m;
-  ++m;
-  ++m;
-  ++m;
-  ASSERT_EQ(39, m.iterator());
+  s21::map<int, std::string>::iterator it = m.begin();
+  ++it;
+  ++it;
+  ++it;
+  ++it;
+  ++it;
+  ASSERT_EQ(39, it.cget());
   ASSERT_TRUE(m.contains(39));
-  m.erase();
+  m.erase(it);
   ASSERT_FALSE(m.contains(39));
 }
 

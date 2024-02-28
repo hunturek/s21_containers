@@ -41,13 +41,6 @@ int main() {
   value = mp.at(18);
   std::cout << "Value for key 18: " << value << std::endl;
 
-  mp.begin();
-  for(size_t i = 0; i < mp.size(); i++){
-    value = mp.at(mp.const_iterator());
-    std::cout << "Value for iterator: " << value << std::endl;
-    ++mp;
-  }
-
   s21::map<int, std::string> tmp = {
     {11, "Adam11"},
     {22, "Adam22"},
@@ -58,17 +51,32 @@ int main() {
     {77, "Adam77"},
     {88, "Adam88"}
   };
-  mp.merge(tmp);
 
   std::cout << std::endl;
 
-  mp.begin();
-  for(size_t i = 0; i < mp.size(); i++){
-    value = mp.at(mp.const_iterator());
-    std::cout << "Value for iterator: " << value << std::endl;
-    ++mp;
-  }
-  
+  s21::map<int, std::string>::iterator it = mp.begin();
+  std::cout << it.cget() << std::endl;
+  ++it;
+  std::cout << it.cget() << std::endl;
+  ++it;
+  std::cout << it.cget() << std::endl;
+  it.last_node();
+  std::cout << it.cget() << std::endl;
+  ++it;
+  std::cout << it.cget() << std::endl;
+  --it;
+  std::cout << it.cget() << std::endl;
+
+
+  /*s21::map<int,std::string>::iterator it = mp.begin();
+  std::cout << it.cget() << std::endl;
+  --it;
+  std::cout << it.cget() << std::endl;
+  --it;
+  std::cout << it.cget() << std::endl;
+  --it;
+  std::cout << it.cget() << std::endl;*/
+
   if(mp.empty())
     std::cout << "Empty";
   //mp(items);
