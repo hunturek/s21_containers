@@ -152,8 +152,8 @@ public:
     current = root;
     parent = nullptr;
     while (current != nullptr) {
-      if (value.first == current->value)
-        return 1;
+      /*if (value.first == current->value)
+        return 1;*/
       parent = current;
       current = value.first < current->value ? current->left : current->right;
     }
