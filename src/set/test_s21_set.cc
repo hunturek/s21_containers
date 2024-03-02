@@ -98,8 +98,9 @@ TEST(s21_set, erase) {
   ++it;
   ASSERT_EQ(39, it.cget());
   ASSERT_TRUE(s.contains(39));
-  s.erase(it);
+  s21::set<int>::iterator it2 = s.erase(it);
   ASSERT_FALSE(s.contains(39));
+  ASSERT_EQ(47, it2.cget());
 }
 
 TEST(s21_set, merge) {

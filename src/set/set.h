@@ -70,8 +70,17 @@ public:
     tree << std::make_pair(value, value);
     return {it.set(value), true};
   }
-  void erase(iterator it) {
+  bool erase(const value_type& value) {
+    if(!this->contains(value))
+      return false;
+    tree >> value;
+    return true;
+  }
+  iterator erase(iterator it) {
+    iterator tmp = it;
+    ++tmp;
     tree >> it.cget();
+    return tmp;
   }
   void merge(set& other) {
     iterator it = other.begin();

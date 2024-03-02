@@ -119,7 +119,9 @@ public:
         
         tree_iterator &operator=(tree_iterator &other) {
             this->position = other.position;
-            current_node = other.get();
+            this->current_node = other.current_node;
+            this->root_node = other.root_node;
+            this->max_position = other.max_position;
             return *this;
         }
         
@@ -210,7 +212,11 @@ public:
       z->value = y->value;
     if (y->color == BLACK)
       del_balance(x);
-    free(y);
+    if(y->parent && y->parent->right == y)
+      y->parent->right = nullptr;
+    if(y->parent && y->parent->left == y)
+      y->parent->left = nullptr;
+    delete(y);
     return 0;
   }
 

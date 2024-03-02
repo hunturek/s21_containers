@@ -68,8 +68,17 @@ public:
     tree << std::make_pair(value, value);
     return it.set(value);
   }
-  void erase(iterator it) {
+  bool erase(const value_type& value) {
+    if(!this->contains(value))
+      return false;
+    tree >> value;
+    return true;
+  }
+  iterator erase(iterator it) {
+    iterator tmp = it;
+    ++tmp;
     tree >> it.cget();
+    return tmp;
   }
   void merge(multiset& other) {
     iterator it = other.begin();
@@ -95,10 +104,15 @@ public:
     }
   }
 
+  size_type count(const Key& key) {
+    auto pos = this->equal_range(key);
+    return pos.second.position - pos.first.position;
+  }
+
   std::pair<iterator, iterator> equal_range(const Key& key) {
     iterator it2 = this->begin();
     iterator it1 = this->begin();
-    while(it2.cget() < key)
+    while(it2.cget() <= key)
       ++it2;
     if(this->contains(key))
       return std::make_pair(it1.set(key), it2);
